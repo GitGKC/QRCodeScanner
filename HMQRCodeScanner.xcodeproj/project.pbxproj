@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4F9362021E5FCAA500529F3F /* GetImageBright.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F9362011E5FCAA500529F3F /* GetImageBright.m */; };
 		4F9362041E5FDA8000529F3F /* HMScanner.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 4F9362031E5FDA8000529F3F /* HMScanner.bundle */; };
 		C20FE0431C38B77500EF2C5E /* HMScannerMaskView.m in Sources */ = {isa = PBXBuildFile; fileRef = C20FE0421C38B77500EF2C5E /* HMScannerMaskView.m */; };
 		C2BC28A81C377B0900CD8839 /* HMScannerBorder.m in Sources */ = {isa = PBXBuildFile; fileRef = C2BC28A71C377B0900CD8839 /* HMScannerBorder.m */; };
@@ -24,8 +23,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		4F9362001E5FCAA500529F3F /* GetImageBright.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GetImageBright.h; sourceTree = "<group>"; };
-		4F9362011E5FCAA500529F3F /* GetImageBright.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GetImageBright.m; sourceTree = "<group>"; };
 		4F9362031E5FDA8000529F3F /* HMScanner.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = HMScanner.bundle; sourceTree = "<group>"; };
 		C20FE0411C38B77500EF2C5E /* HMScannerMaskView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HMScannerMaskView.h; sourceTree = "<group>"; };
 		C20FE0421C38B77500EF2C5E /* HMScannerMaskView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HMScannerMaskView.m; sourceTree = "<group>"; };
@@ -118,8 +115,6 @@
 				C20FE0421C38B77500EF2C5E /* HMScannerMaskView.m */,
 				C2BC28AA1C37809500CD8839 /* HMScanner.m */,
 				C2BC28A91C37809500CD8839 /* HMScanner.h */,
-				4F9362001E5FCAA500529F3F /* GetImageBright.h */,
-				4F9362011E5FCAA500529F3F /* GetImageBright.m */,
 				4F9362031E5FDA8000529F3F /* HMScanner.bundle */,
 			);
 			path = QRCode;
@@ -200,7 +195,6 @@
 			files = (
 				C2D6BD021C377219000EC35D /* ViewController.m in Sources */,
 				C2D6BD141C3772D9000EC35D /* HMScannerController.m in Sources */,
-				4F9362021E5FCAA500529F3F /* GetImageBright.m in Sources */,
 				C2D6BD171C37733E000EC35D /* HMScannerViewController.m in Sources */,
 				C2D6BCFF1C377219000EC35D /* AppDelegate.m in Sources */,
 				C20FE0431C38B77500EF2C5E /* HMScannerMaskView.m in Sources */,
@@ -324,6 +318,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer: HANG XIE (WJBY9J74LZ)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = HMQRCodeScanner/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -331,6 +326,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = smit.btupdater;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "ef6236ca-d6ca-4816-bdb9-e9fd0a81778f";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
@@ -338,6 +334,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = HMQRCodeScanner/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -345,6 +342,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = smit.btupdater;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "ef6236ca-d6ca-4816-bdb9-e9fd0a81778f";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};

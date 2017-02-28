@@ -8,12 +8,11 @@
 
 #import "HMScanner.h"
 #import <AVFoundation/AVFoundation.h>
-#import "GetImageBright.h"
 
 /// 最大检测次数
 #define kMaxDetectedCount   20
 
-@interface HMScanner() <AVCaptureMetadataOutputObjectsDelegate>
+@interface HMScanner() <AVCaptureMetadataOutputObjectsDelegate,AVCaptureVideoDataOutputSampleBufferDelegate>
 /// 父视图弱引用
 @property (nonatomic, weak) UIView *parentView;
 /// 扫描范围
@@ -37,10 +36,12 @@
     /// 当前检测计数
     NSInteger currentDetectedCount;
     
-    // 图像捕捉输出
-    AVCaptureStillImageOutput * _stillImageOutput;
-    //捕获时钟
-    NSTimer * _brightTimer;
+//    // 图像捕捉输出
+//    AVCaptureStillImageOutput * _stillImageOutput;
+//    //捕获时钟
+//    NSTimer * _brightTimer;
+    
+    AVCaptureVideoDataOutput * _videoOutput;
 }
 
 #pragma mark - 生成二维码
@@ -283,6 +284,9 @@
     
     // 1> 输入设备
     device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    [device lockForConfiguration:nil];
+    device.activeVideoMinFrameDuration = CMTimeMake(1, 5);
+    [device unlockForConfiguration];
     AVCaptureDeviceInput *videoInput = [AVCaptureDeviceInput deviceInputWithDevice:device error:nil];
     
     if (videoInput == nil) {
@@ -318,53 +322,87 @@
     
     // 6> 设置预览图层会话
     [self setupLayers];
+    
 }
 
 /************************ 添加图像捕捉输出 *********************/
 - (void)addCaptureImage:(void(^)(int bright))brightBlock {
     if ([device hasTorch]) {
-        _stillImageOutput = [[AVCaptureStillImageOutput alloc] init];
-        _stillImageOutput.outputSettings = @{AVVideoCodecKey:AVVideoCodecJPEG};
-        if (![session canAddOutput:_stillImageOutput]) {
+        _videoOutput = [[AVCaptureVideoDataOutput alloc] init];
+        dispatch_queue_t queue = dispatch_queue_create("brightCapture.scanner.queue.com", NULL);
+        [_videoOutput setSampleBufferDelegate:self queue:queue];
+        _videoOutput.videoSettings =
+        [NSDictionary dictionaryWithObject:
+         [NSNumber numberWithInt:kCVPixelFormatType_32BGRA]
+                                    forKey:(id)kCVPixelBufferPixelFormatTypeKey];
+        if (![session canAddOutput:_videoOutput]) {
             return;
         }
+        [session addOutput:_videoOutput];
         
-        [session addOutput:_stillImageOutput];
-        
-        if (!_brightTimer) {
-            _brightTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(getCaptureImageBright) userInfo:nil repeats:YES];
-        }
         self.brightBlock = brightBlock;
     }
 }
 
-- (void)getCaptureImageBright {
-    AVCaptureConnection *connect = [_stillImageOutput connectionWithMediaType:AVMediaTypeVideo];
-    [_stillImageOutput captureStillImageAsynchronouslyFromConnection:connect completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
-        if (imageDataSampleBuffer != NULL) {
-            NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
-            GetImageBright *brightGet = [[GetImageBright alloc] init];
-            int bright = [brightGet getBrightWithImage:[UIImage imageWithData:imageData]];
-            self.brightBlock(bright);
+
+#pragma mark --- AVCaptureVideoDataOutputSampleBufferDelegate
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
+    int bright = [self getBrightWith:sampleBuffer];
+//    NSLog(@"%d",bright);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.brightBlock(bright);
+    });
+}
+
+- (int)getBrightWith:(CMSampleBufferRef)sampleBuffer
+{
+    // Get a CMSampleBuffer's Core Video image buffer for the media data
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    // Lock the base address of the pixel buffer
+    CVPixelBufferLockBaseAddress(imageBuffer, 0);
+    
+    // Get the number of bytes per row for the pixel buffer
+    unsigned char * baseAddress = CVPixelBufferGetBaseAddress(imageBuffer);
+    
+//    // Get the pixel buffer width and height
+    size_t width = CVPixelBufferGetWidth(imageBuffer);
+    size_t height = CVPixelBufferGetHeight(imageBuffer);
+
+     CVPixelBufferUnlockBaseAddress(imageBuffer,0);
+    
+    int num = 1;
+    double bright = 0;
+    int r;
+    int g;
+    int b;
+    for (int i = 0; i < 4 * width * height; i++) {
+        if (i%4 == 0) {
+            num++;
+            r = baseAddress[i+1];
+            g = baseAddress[i+2];
+            b = baseAddress[i+3];
+            bright = bright + 0.299 * r + 0.587 * g + 0.114 * b;
         }
-    }];
+    }
+    
+    bright = (int) (bright / num);
+    return bright;
+    
 }
 
 - (void)setTorch:(BOOL)isOpen {
     [device lockForConfiguration:nil];
     if (isOpen) {
         [device setTorchMode:AVCaptureTorchModeOn];
-        [_brightTimer invalidate];
-        _brightTimer = nil;
     }
     else {
         [device setTorchMode:AVCaptureTorchModeOff];
-        if (!_brightTimer) {
-            _brightTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(getCaptureImageBright) userInfo:nil repeats:YES];
-        }
     }
     [device unlockForConfiguration];
 }
 
+- (BOOL)isTorchOpen {
+    return device.isTorchActive;
+}
 
 @end

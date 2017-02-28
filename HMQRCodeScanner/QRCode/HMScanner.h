@@ -46,8 +46,11 @@
 /// 停止扫描
 - (void)stopScan;
 
+/// 捕捉亮度值
 - (void)addCaptureImage:(void(^)(int bright))brightBlock;
 
 - (void)setTorch:(BOOL)isOpen;
+
+@property (nonatomic,assign,readonly) BOOL isTorchOpen;
 
 @end

@@ -66,8 +66,13 @@
         [weakSelf clickCloseButton];
     }];
     
+    ///添加获取图像亮度值
+    __weak typeof(scanner) weakScanner = scanner;
     [scanner addCaptureImage:^(int bright) {
         if (bright > 40) {
+            if (weakScanner.isTorchOpen) {
+                return;
+            }
             weakSelf.torchBtn.hidden = YES;
         } else {
             weakSelf.torchBtn.hidden = NO;
@@ -253,6 +258,7 @@
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"相册" style:UIBarButtonItemStylePlain target:self action:@selector(clickAlbumButton)];
 }
 
+/// 手电筒按钮
 - (void)torchBtnClick {
     _isOpen = !_isOpen;
     
@@ -273,15 +279,5 @@
         [scanner setTorch:NO];
     }
 }
-
-- (void)showTorch:(BOOL)isHiden {
-    if (isHiden) {
-        _torchBtn.hidden = YES;
-    }
-    else {
-        _torchBtn.hidden = NO;
-    }
-}
-
 
 @end
